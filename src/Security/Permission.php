@@ -4,8 +4,6 @@ namespace App\Security;
 
 use App\Interfaces\User;
 use App\Interfaces\Voter;
-use App\Security\Voter\AdminVoter;
-use App\Security\Voter\PostVoter;
 
 final class Permission
 {
@@ -60,8 +58,10 @@ final class Permission
     {
         $perm = new self();
 
-        $perm->addVoter(new AdminVoter());
-        $perm->addVoter(new PostVoter());
+        foreach (glob(__DIR__ . '/Voter/*.php') as $voter) {
+            $class = 'App\\Security\\Voter\\' . substr(basename($voter), 0, -4);
+            $perm->addVoter(new $class);
+        }
 
         return $perm->can($user, $permission, $subject);
     }
